@@ -13,5 +13,5 @@ The user should be able to submit their transaction while offline and then once 
 4. CREDIT
 This application was created by Cameron Bushehry
 
-GITHUB:
-WEBSITE:
+GITHUB: https://github.com/cbushehry
+WEBSITE: https://budget-tracker-cjb.herokuapp.com/
