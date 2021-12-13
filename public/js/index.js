@@ -10,7 +10,12 @@ fetch("/api/transaction")
     transactions = data;
 
     populateTotal();
-    populateTable();
+    populateTable(); //history
+    populateChart(); //chart
+  })
+  .catch(err => {
+    console.log(err)
+    //saveChartTransactions(transactions)
     populateChart();
   });
 
@@ -135,14 +140,53 @@ function sendTransaction(isAdding) {
     }
   })
   .catch(err => {
+    console.log(err)
     // fetch failed, so save in indexed db
     saveRecord(transaction);
-
     // clear form
     nameEl.value = "";
     amountEl.value = "";
   });
 }
+
+// indexDB upload transaction
+function uploadTransaction() {
+  const transaction = db.transaction(['new_transaction'], 'readwrite');
+
+  const budgetObjectStore = transaction.objectStore('new_transaction');
+
+  const getAll = budgetObjectStore.getAll();
+
+
+  getAll.onsuccess = function() {
+    if (getAll.result.length > 0) {
+      fetch('/api/transaction', {
+        method: 'POST',
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(serverResponse => {
+          if (serverResponse.message) {
+            throw new Error(serverResponse);
+          }
+          const transaction = db.transaction(['new_transaction'], 'readwrite');
+          const budgetObjectStore = transaction.objectStore('new_transaction');
+          budgetObjectStore.clear();
+
+          alert('All saved transactions have been submitted!');
+          location.reload()
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
+}
+
 
 document.querySelector("#add-btn").onclick = function() {
   sendTransaction(true);
